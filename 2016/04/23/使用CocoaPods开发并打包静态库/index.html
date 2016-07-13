@@ -1,0 +1,364 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script type="text/javascript" src="http://tajs.qq.com/stats?sId=44218032" charset="UTF-8"></script>
+  <script>
+	var _hmt = _hmt || [];
+	(function() {
+	  var hm = document.createElement("script");
+	  hm.src = "//hm.baidu.com/hm.js?7192fa361f5cabb11d8a22de41c1ba8f";
+	  var s = document.getElementsByTagName("script")[0]; 
+	  s.parentNode.insertBefore(hm, s);
+	})();
+	</script>
+  
+  <title>使用CocoaPods开发并打包静态库 | See forward</title>
+  <meta name="author" content="zmarvin">
+  
+  <meta name="description" content="不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个">
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+  <meta property="og:title" content="使用CocoaPods开发并打包静态库"/>
+  <meta property="og:site_name" content="See forward"/>
+
+  
+    <meta property="og:image" content="undefined"/>
+  
+
+  <link href="/imgs/favicon.ico" rel="icon" type="image/x-ico">
+  <link rel="alternate" href="/atom.xml" title="See forward" type="application/atom+xml">
+  <link rel="stylesheet" href="/css/style.css" media="screen" type="text/css">
+  <!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+  <script src="//libs.baidu.com/jquery/1.8.0/jquery.min.js"></script>
+</head>
+
+
+<body>
+  <header><div>
+		
+			<div id="imglogo">
+				<a href="/"><img src="/imgs/logo.png" alt="See forward" title="See forward"/></a>
+			</div>
+			
+			<div id="textlogo">
+				<h1 class="site-name">See forward</h1>
+				<h2 class="blog-motto"></h2>
+			</div>
+			<nav class="animated">
+				<ul>
+					
+						<li><a href="/">Home</a></li>
+					
+						<li><a href="/archives">Archives</a></li>
+					
+						<li><a href="/about">About</a></li>
+					
+					<li> <a href="/atom.xml">RSS</a> </li>
+				</ul>
+			</nav>			
+</div>
+</header>
+  <div id="content" class="inner">
+    <div id="main-col" class="alignleft"><div id="wrapper"><article class="post">
+  
+    <div class="gallery">
+  <div class="photoset">
+    
+      <img src="">
+    
+  </div>
+  <div class="control">
+    <div class="prev"></div>
+    <div class="next"></div>
+  </div>
+</div>
+  
+  <div class="post-content">
+    <header class="article-info clearfix">
+  <h1 itemprop="name">
+	使用CocoaPods开发并打包静态库
+  </h1>
+  <p class="article-author">By
+    
+      <a href="http://yoursite.com" title="zmarvin">zmarvin</a>
+    </p>
+  <p class="article-time">
+    <time datetime="2016-04-22T16:00:00.000Z" itemprop="datePublished">2016-04-23</time>
+    Update date:<time datetime="2016-07-13T02:50:28.000Z" itemprop="dateModified">2016-07-13</time>
+    
+  </p>
+</header>
+    <div class="entry">
+		
+        <p>不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个可以同时存在。在开始之前，需要安装通过pod lib命令完成初始项目的搭建，和安装cocoapods-packager插件。</p>
+<p>注：根据上下文将代码中XXX修改为自己相应的内容</p>
+<h3 id="一，通过pod-lib命令完成初始项目的搭建"><a href="#一，通过pod-lib命令完成初始项目的搭建" class="headerlink" title="一，通过pod lib命令完成初始项目的搭建"></a>一，通过pod lib命令完成初始项目的搭建</h3><ul>
+<li><p>执行命令</p>
+<pre><code>pod lib create XXXLib
+</code></pre></li>
+<li><p>在此期间需要确认下面4个问题：</p>
+<pre><code>Would you like to provide a demo application with your library? [ Yes / No ]
+yes
+Which testing frameworks will you use? [ Specta / Kiwi / None ]
+Kiwi
+Would you like to do view based testing? [ Yes / No ]
+No
+What is your class prefix?
+XXX
+</code></pre></li>
+</ul>
+<h3 id="二，安装cocoapods-packager插件"><a href="#二，安装cocoapods-packager插件" class="headerlink" title="二，安装cocoapods-packager插件"></a>二，安装cocoapods-packager插件</h3><ul>
+<li><p>执行命令</p>
+<pre><code>sudo gem install cocoapods-packager
+</code></pre></li>
+</ul>
+<h3 id="三，配置podspec文件，下面是我项目中的podspec文件，请参考配置"><a href="#三，配置podspec文件，下面是我项目中的podspec文件，请参考配置" class="headerlink" title="三，配置podspec文件，下面是我项目中的podspec文件，请参考配置"></a>三，配置podspec文件，下面是我项目中的podspec文件，请参考配置</h3><p><a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">官方podspec文件语法详细说明</a></p>
+<pre><code>Pod::Spec.new do |s|
+s.name             = &quot;XXXLIB&quot;
+s.version          = &quot;0.4.0.8&quot;
+s.summary          = &quot;生成静态库的XXXLIB.&quot;
+
+s.description      = &lt;&lt;-DESC
+成静态库的XXXLIB
+DESC
+
+s.homepage         = &quot;https://github.com/username/XXXLIB&quot;
+
+s.license          = &apos;MIT&apos;
+s.author           = { &quot;username&quot; =&gt; &quot;XXX@gmail.com&quot; }
+# s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; &apos;0.4.0.8&apos;}
+s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; s.version.to_s}
+
+s.platform         = :ios, &apos;7.0&apos;
+s.requires_arc     = true
+
+s.source_files     = [&apos;Pod/Classes/**/*.{h,m,plist,c}&apos;]
+
+s.resource_bundles = {
+&apos;XXXRES&apos; =&gt; [&apos;Pod/Assets/*.{png,jpg}&apos;]
+}
+
+s.public_header_files = [&apos;Pod/Classes/XXX/*.h&apos;]
+
+s.frameworks = [&apos;UIKit&apos;, &apos;MapKit&apos;,&apos;MobileCoreServices&apos;,&apos;MobileCoreServices&apos;,&apos;SystemConfiguration&apos;,&apos;CFNetwork&apos;,&apos;AVFoundation&apos;,&apos;CoreData&apos;,&apos;ImageIO&apos;,&apos;Twitter&apos;]
+s.libraries  = &apos;z.1&apos;
+s.dependency &apos;AFNetworking&apos;, &apos;~&gt; 2.3&apos;
+s.dependency &apos;FMDB&apos;,&apos;~&gt; 2.2&apos;
+s.dependency &apos;MJExtension&apos;
+s.dependency &apos;SDWebImage&apos;
+s.dependency &apos;CocoaAsyncSocket&apos;
+s.dependency &apos;JSONModel&apos;
+
+end
+</code></pre><h3 id="四，基于pod自动创建静态类库以及打包的过程"><a href="#四，基于pod自动创建静态类库以及打包的过程" class="headerlink" title="四，基于pod自动创建静态类库以及打包的过程"></a>四，基于pod自动创建静态类库以及打包的过程</h3><h5 id="1-验证"><a href="#1-验证" class="headerlink" title="1,验证"></a>1,验证</h5><p>开发完成静态类库之后，需要运行pod lib lint验证一下类库是否符合pod的要求（cd到podspec文件所在目录下）</p>
+<pre><code>pod lib lint XXXLIB.podspec -only-errors –verbose –allow-warnings
+</code></pre><h5 id="2-更新pod（cd到Podfile文件所在目录下）"><a href="#2-更新pod（cd到Podfile文件所在目录下）" class="headerlink" title="2,更新pod（cd到Podfile文件所在目录下）"></a>2,更新pod（cd到Podfile文件所在目录下）</h5><pre><code>pod update –verbose –no-repo-update 或者pod setup
+</code></pre><h5 id="3-提交-更新版本号（cd到podspec文件所在目录下）"><a href="#3-提交-更新版本号（cd到podspec文件所在目录下）" class="headerlink" title="3,提交,更新版本号（cd到podspec文件所在目录下）"></a>3,提交,更新版本号（cd到podspec文件所在目录下）</h5><pre><code>git add .
+
+git commit -a -m’v请换成版本号’
+
+git tag -a 版本号 -m’v版本号’
+</code></pre><h5 id="4-将podspec文件中s-version的版本号替换为所需要的版本号（第三步git-tag的版本）"><a href="#4-将podspec文件中s-version的版本号替换为所需要的版本号（第三步git-tag的版本）" class="headerlink" title="4,将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）"></a>4,将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</h5><pre><code>s.version = “修改为自己需要的版本号”
+</code></pre><h5 id="5-打包（cd到podspec所在文件目录下）"><a href="#5-打包（cd到podspec所在文件目录下）" class="headerlink" title="5,打包（cd到podspec所在文件目录下）"></a>5,打包（cd到podspec所在文件目录下）</h5><pre><code>pod package XXXLIB.podspec –library –force 打包成.a文件。–force是指强制覆盖
+
+pod package XXXLIB.podspec –force 打包成.framework文件
+</code></pre><h3 id="五，相关的参考阅读"><a href="#五，相关的参考阅读" class="headerlink" title="五，相关的参考阅读"></a>五，相关的参考阅读</h3><ul>
+<li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">关于分类category打包的错误处理
+</a></li>
+<li><a href="http://www.cnblogs.com/brycezhang/p/4117180.html" target="_blank" rel="external">使用CocoaPods开发并打包静态库</a></li>
+</ul>
+
+    </div>
+    <footer>
+        
+  
+  <div class="categories">
+    <a href="/categories/blog/">blog</a>
+  </div>
+
+        
+		<div class="bdsharebuttonbox">
+	<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a>
+	<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a>
+	<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"></a>
+	<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a>
+	<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a>
+	<a href="#" class="bds_fbook" data-cmd="fbook" title="分享到Facebook"></a>
+	<a href="#" class="bds_twi" data-cmd="twi" title="分享到Twitter"></a>
+	<a href="#" class="bds_more" data-cmd="more"></a>
+	<a href="#" class="bds_count" data-cmd="count"></a>
+</div>
+<script>
+window._bd_share_config=
+{
+	"common":{
+		"bdSnsKey":{},
+		"bdText":"",
+		"bdMini":"2",
+		"bdMiniList":false,
+		"bdPic":"",
+		"bdStyle":"0",
+		"bdSize":"24"
+	},
+	"share":{},
+	"image":{
+		"viewList":["qzone","tsina","tqq","renren","weixin","fbook","twi"],
+		"viewText":"分享到：",
+		"viewSize":"24"
+	},
+	"selectShare":{
+		"bdContainerClass":null,
+		"bdSelectMiniList":["qzone","tsina","tqq","renren","weixin","fbook","twi"]
+	}
+};
+with(document)0[
+	(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)
+];
+</script>    
+        <div class="clearfix"></div>
+    </footer>
+  </div>
+</article>
+
+ <nav id="pagination" >
+    
+    
+    <div class="clearfix"></div>
+</nav>
+
+
+</div></div>
+    <aside id="sidebar" class="alignright">
+  <div class="search">
+  <form action="//google.com/search" method="get" accept-charset="utf-8">
+    <input type="search" name="q" results="0" placeholder="Search">
+    <input type="hidden" name="q" value="site:yoursite.com">
+  </form>
+</div>
+
+  
+<div class="widget tag">
+  <h3 class="title">Categories</h3>
+  <ul class="entry">
+  
+    <li><a href="/categories/blog/">blog</a><small>1</small></li>
+  
+  </ul>
+</div>
+
+
+  
+<div class="widget tagcloud">
+  <h3 class="title">Tag Cloud</h3>
+  <div class="entry">
+    
+  </div>
+</div>
+
+
+  <iframe width="100%" height="140" class="share_self"  frameborder="0" scrolling="no" src="http://widget.weibo.com/weiboshow/index.php?language=&width=0&height=550&fansRow=2&ptype=1&speed=0&skin=1&isTitle=1&noborder=1&isWeibo=0&isFans=0&uid=1923610190&verifier=6af5ad6a&colors=fafafa,fafafa,666666,0082cb,ecfbfd&dpc=1"></iframe>
+
+  <div class="widget tag">
+<h3 class="title">友情链接</h3>
+<ul class="entry">
+<li><a href="http://opiece.me" title="Chillax's Blog" target="_blank">Chillax</a></li>
+</ul>
+</div>
+</aside>
+    <div class="clearfix"></div>
+  </div>
+  <footer id="footer"><div id="footer" >
+	
+	<div class="line">
+		<span></span>
+		<div class="author"></div>
+	</div>
+	
+	
+	<section class="info">
+		<p> Hi,I&#39;m the designer of this theme. <br/>
+			You can download this theme on my github.</p>
+	</section>
+	 
+	<div class="social-font clearfix">
+		
+		<a href="http://weibo.com/1923610190" target="_blank" title="weibo"></a>
+		
+		
+		
+		<a href="https://github.com/huangjunhui" target="_blank" title="github"></a>
+		
+		
+		<a href="https://www.facebook.com/huangjunhui" target="_blank" title="facebook"></a>
+		
+		
+		
+		<a href="mailto:jhhuang1993@foxmail.com" target="_blank" class="icon-email" title="Email Me"></a>
+		
+	</div>
+		<p class="copyright">Powered by <a href="http://hexo.io" target="_blank" title="hexo">hexo</a> and Theme by <a href="https://github.com/huangjunhui/concise" target="_blank" title="Concise">Concise</a> © 2016 
+		
+		<a href="http://yoursite.com/about" target="_blank" title="zmarvin">zmarvin</a>
+		
+		</p>
+</div>
+</footer>
+  <script src="//libs.baidu.com/jquery/2.0.3/jquery.min.js"></script>
+<script src="/js/jquery.imagesloaded.min.js"></script>
+<script src="/js/gallery.js"></script>
+<script src="/js/counter.js"></script>
+
+
+
+
+<link rel="stylesheet" href="/fancybox/jquery.fancybox.css" media="screen" type="text/css">
+<script src="/fancybox/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+  $('.fancybox').fancybox();
+})(jQuery);
+</script>
+
+<div id="totop" style="position:fixed;bottom:100px;right:10px;cursor: pointer;">
+<a title="返回顶部"><img src="/imgs/scrollup.png"/></a>
+</div>
+<script src="/js/totop.js"></script>
+<!-- mathjax config similar to math.stackexchange -->
+
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({
+    tex2jax: {
+      inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+      processEscapes: true
+    }
+  });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {
+        skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+      }
+    });
+</script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for(i=0; i < all.length; i += 1) {
+            all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+    });
+</script>
+
+<script type="text/javascript" src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+</body>
+</html>
+
+

@@ -90,7 +90,7 @@
 <meta property="og:url" content="http://yoursite.com/2016/04/23/使用CocoaPods开发并打包静态库/index.html">
 <meta property="og:site_name" content="seeforward">
 <meta property="og:description" content="不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个可以同时存在。在开始之前，需要安装通过pod lib命令完成初始项目的搭建，和安装cocoapods">
-<meta property="og:updated_time" content="2016-07-13T02:50:28.000Z">
+<meta property="og:updated_time" content="2016-07-15T09:20:30.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用CocoaPods开发并打包静态库">
 <meta name="twitter:description" content="不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个可以同时存在。在开始之前，需要安装通过pod lib命令完成初始项目的搭建，和安装cocoapods">
@@ -324,7 +324,9 @@ XXX
 <pre><code>sudo gem install cocoapods-packager
 </code></pre></li>
 </ul>
-<h3 id="三，配置podspec文件，下面是我项目中的podspec文件，请参考配置"><a href="#三，配置podspec文件，下面是我项目中的podspec文件，请参考配置" class="headerlink" title="三，配置podspec文件，下面是我项目中的podspec文件，请参考配置"></a>三，配置podspec文件，下面是我项目中的podspec文件，请参考配置</h3><p><a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">官方podspec文件语法详细说明</a></p>
+<h3 id="三，配置podspec文件"><a href="#三，配置podspec文件" class="headerlink" title="三，配置podspec文件"></a>三，配置podspec文件</h3><ul>
+<li><a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">官方podspec文件语法详细说明</a></li>
+<li><p>下面是我项目中的podspec文件，请参考配置</p>
 <pre><code>Pod::Spec.new do |s|
 s.name             = &quot;XXXLIB&quot;
 s.version          = &quot;0.4.0.8&quot;
@@ -362,23 +364,38 @@ s.dependency &apos;CocoaAsyncSocket&apos;
 s.dependency &apos;JSONModel&apos;
 
 end
-</code></pre><h3 id="四，基于pod自动创建静态类库以及打包的过程"><a href="#四，基于pod自动创建静态类库以及打包的过程" class="headerlink" title="四，基于pod自动创建静态类库以及打包的过程"></a>四，基于pod自动创建静态类库以及打包的过程</h3><h5 id="1-验证"><a href="#1-验证" class="headerlink" title="1,验证"></a>1,验证</h5><p>开发完成静态类库之后，需要运行pod lib lint验证一下类库是否符合pod的要求（cd到podspec文件所在目录下）</p>
+</code></pre></li>
+</ul>
+<h3 id="四，基于pod自动创建静态类库以及打包的过程"><a href="#四，基于pod自动创建静态类库以及打包的过程" class="headerlink" title="四，基于pod自动创建静态类库以及打包的过程"></a>四，基于pod自动创建静态类库以及打包的过程</h3><ol>
+<li><p>验证</p>
+<p> 开发完成静态类库之后，需要运行pod lib lint验证一下类库是否符合pod的要求（cd到podspec文件所在目录下）</p>
 <pre><code>pod lib lint XXXLIB.podspec -only-errors –verbose –allow-warnings
-</code></pre><h5 id="2-更新pod（cd到Podfile文件所在目录下）"><a href="#2-更新pod（cd到Podfile文件所在目录下）" class="headerlink" title="2,更新pod（cd到Podfile文件所在目录下）"></a>2,更新pod（cd到Podfile文件所在目录下）</h5><pre><code>pod update –verbose –no-repo-update 或者pod setup
-</code></pre><h5 id="3-提交-更新版本号（cd到podspec文件所在目录下）"><a href="#3-提交-更新版本号（cd到podspec文件所在目录下）" class="headerlink" title="3,提交,更新版本号（cd到podspec文件所在目录下）"></a>3,提交,更新版本号（cd到podspec文件所在目录下）</h5><pre><code>git add .
+</code></pre></li>
+<li><p>更新pod（cd到Podfile文件所在目录下）</p>
+<pre><code>pod update –verbose –no-repo-update 或者pod setup
+</code></pre></li>
+<li><p>提交,更新版本号（cd到podspec文件所在目录下）</p>
+<pre><code>git add .
 
 git commit -a -m’v请换成版本号’
 
 git tag -a 版本号 -m’v版本号’
-</code></pre><h5 id="4-将podspec文件中s-version的版本号替换为所需要的版本号（第三步git-tag的版本）"><a href="#4-将podspec文件中s-version的版本号替换为所需要的版本号（第三步git-tag的版本）" class="headerlink" title="4,将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）"></a>4,将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</h5><pre><code>s.version = “修改为自己需要的版本号”
-</code></pre><h5 id="5-打包（cd到podspec所在文件目录下）"><a href="#5-打包（cd到podspec所在文件目录下）" class="headerlink" title="5,打包（cd到podspec所在文件目录下）"></a>5,打包（cd到podspec所在文件目录下）</h5><pre><code>pod package XXXLIB.podspec –library –force 打包成.a文件。–force是指强制覆盖
+</code></pre></li>
+<li><p>将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</p>
+<pre><code>s.version = “修改为自己需要的版本号”
+</code></pre></li>
+<li><p>打包（cd到podspec所在文件目录下）</p>
+<pre><code>pod package XXXLIB.podspec –library –force 打包成.a文件。–force是指强制覆盖
 
 pod package XXXLIB.podspec –force 打包成.framework文件
-</code></pre><h3 id="五，相关的参考阅读"><a href="#五，相关的参考阅读" class="headerlink" title="五，相关的参考阅读"></a>五，相关的参考阅读</h3><ul>
+</code></pre></li>
+</ol>
+<h3 id="五，相关的参考阅读"><a href="#五，相关的参考阅读" class="headerlink" title="五，相关的参考阅读"></a>五，相关的参考阅读</h3><ul>
 <li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">关于分类category打包的错误处理
 </a></li>
 <li><a href="http://www.cnblogs.com/brycezhang/p/4117180.html" target="_blank" rel="external">使用CocoaPods开发并打包静态库</a></li>
 </ul>
+<p><br><br><br></p>
 
       
     </div>
@@ -525,7 +542,7 @@ pod package XXXLIB.podspec –force 打包成.framework文件
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一，通过pod-lib命令完成初始项目的搭建"><span class="nav-number">1.</span> <span class="nav-text">一，通过pod lib命令完成初始项目的搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二，安装cocoapods-packager插件"><span class="nav-number">2.</span> <span class="nav-text">二，安装cocoapods-packager插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三，配置podspec文件，下面是我项目中的podspec文件，请参考配置"><span class="nav-number">3.</span> <span class="nav-text">三，配置podspec文件，下面是我项目中的podspec文件，请参考配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四，基于pod自动创建静态类库以及打包的过程"><span class="nav-number">4.</span> <span class="nav-text">四，基于pod自动创建静态类库以及打包的过程</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#1-验证"><span class="nav-number">4.0.1.</span> <span class="nav-text">1,验证</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-更新pod（cd到Podfile文件所在目录下）"><span class="nav-number">4.0.2.</span> <span class="nav-text">2,更新pod（cd到Podfile文件所在目录下）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-提交-更新版本号（cd到podspec文件所在目录下）"><span class="nav-number">4.0.3.</span> <span class="nav-text">3,提交,更新版本号（cd到podspec文件所在目录下）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#4-将podspec文件中s-version的版本号替换为所需要的版本号（第三步git-tag的版本）"><span class="nav-number">4.0.4.</span> <span class="nav-text">4,将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#5-打包（cd到podspec所在文件目录下）"><span class="nav-number">4.0.5.</span> <span class="nav-text">5,打包（cd到podspec所在文件目录下）</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五，相关的参考阅读"><span class="nav-number">5.</span> <span class="nav-text">五，相关的参考阅读</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一，通过pod-lib命令完成初始项目的搭建"><span class="nav-number">1.</span> <span class="nav-text">一，通过pod lib命令完成初始项目的搭建</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二，安装cocoapods-packager插件"><span class="nav-number">2.</span> <span class="nav-text">二，安装cocoapods-packager插件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三，配置podspec文件"><span class="nav-number">3.</span> <span class="nav-text">三，配置podspec文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四，基于pod自动创建静态类库以及打包的过程"><span class="nav-number">4.</span> <span class="nav-text">四，基于pod自动创建静态类库以及打包的过程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#五，相关的参考阅读"><span class="nav-number">5.</span> <span class="nav-text">五，相关的参考阅读</span></a></li></ol></div>
             
           </div>
         </section>

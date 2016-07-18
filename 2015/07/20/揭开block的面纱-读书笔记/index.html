@@ -68,7 +68,7 @@
 <link href="/css/main.css?v=5.0.1" rel="stylesheet" type="text/css" />
 
 
-  <meta name="keywords" content="Hexo, NexT" />
+  <meta name="keywords" content="iOS," />
 
 
 
@@ -84,15 +84,34 @@
 
 
 
-<meta name="description" content="梦想的路上停不下脚步">
-<meta property="og:type" content="website">
-<meta property="og:title" content="seeforward">
-<meta property="og:url" content="http://yoursite.com/index.html">
+<meta name="description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+编译举例比如如下代码：
+int main()
+{
+    static int static_val = 3;
+
+    in">
+<meta property="og:type" content="article">
+<meta property="og:title" content="揭开block的面纱-读书笔记">
+<meta property="og:url" content="http://yoursite.com/2015/07/20/揭开block的面纱-读书笔记/index.html">
 <meta property="og:site_name" content="seeforward">
-<meta property="og:description" content="梦想的路上停不下脚步">
+<meta property="og:description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+编译举例比如如下代码：
+int main()
+{
+    static int static_val = 3;
+
+    in">
+<meta property="og:updated_time" content="2016-07-18T13:04:14.000Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="seeforward">
-<meta name="twitter:description" content="梦想的路上停不下脚步">
+<meta name="twitter:title" content="揭开block的面纱-读书笔记">
+<meta name="twitter:description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+编译举例比如如下代码：
+int main()
+{
+    static int static_val = 3;
+
+    in">
 
 
 
@@ -113,9 +132,9 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/"/>
+  <link rel="canonical" href="http://yoursite.com/2015/07/20/揭开block的面纱-读书笔记/"/>
 
-  <title> seeforward </title>
+  <title> 揭开block的面纱-读书笔记 | seeforward </title>
 </head>
 
 <body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
@@ -136,9 +155,7 @@
     
   
 
-  <div class="container one-collumn sidebar-position-left 
-   page-home 
- ">
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -215,9 +232,9 @@
         <div class="content-wrap">
           <div id="content" class="content">
             
-  <section id="posts" class="posts-expand">
+
+  <div id="posts" class="posts-expand">
     
-      
 
   
   
@@ -237,223 +254,7 @@
             
             
               
-                
-                <a class="post-title-link" href="/2016/04/23/使用CocoaPods开发并打包静态库/" itemprop="url">
-                  使用CocoaPods开发并打包静态库
-                </a>
-              
-            
-          </h1>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            <span class="post-meta-item-icon">
-              <i class="fa fa-calendar-o"></i>
-            </span>
-            <span class="post-meta-item-text">发表于</span>
-            <time itemprop="dateCreated" datetime="2016-04-23T00:00:00+08:00" content="2016-04-23">
-              2016-04-23
-            </time>
-          </span>
-
-          
-            <span class="post-category" >
-              &nbsp; | &nbsp;
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-              
-                <span itemprop="about" itemscope itemtype="https://schema.org/Thing">
-                  <a href="/categories/blog/" itemprop="url" rel="index">
-                    <span itemprop="name">blog</span>
-                  </a>
-                </span>
-
-                
-                
-
-              
-            </span>
-          
-
-          
-            
-              <span class="post-comments-count">
-                &nbsp; | &nbsp;
-                <a href="/2016/04/23/使用CocoaPods开发并打包静态库/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/04/23/使用CocoaPods开发并打包静态库/" itemprop="commentsCount"></span>
-                </a>
-              </span>
-            
-          
-
-          
-
-          
-          
-
-          
-        </div>
-      </header>
-    
-
-
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-            <p>不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个可以同时存在。在开始之前，需要安装通过pod lib命令完成初始项目的搭建，和安装cocoapods-packager插件。</p>
-<p>注：根据上下文将代码中XXX修改为自己相应的内容</p>
-<h3 id="一，通过pod-lib命令完成初始项目的搭建"><a href="#一，通过pod-lib命令完成初始项目的搭建" class="headerlink" title="一，通过pod lib命令完成初始项目的搭建"></a>一，通过pod lib命令完成初始项目的搭建</h3><ul>
-<li><p>执行命令</p>
-<pre><code>pod lib create XXXLib
-</code></pre></li>
-<li><p>在此期间需要确认下面4个问题：</p>
-<pre><code>Would you like to provide a demo application with your library? [ Yes / No ]
-yes
-Which testing frameworks will you use? [ Specta / Kiwi / None ]
-Kiwi
-Would you like to do view based testing? [ Yes / No ]
-No
-What is your class prefix?
-XXX
-</code></pre></li>
-</ul>
-<h3 id="二，安装cocoapods-packager插件"><a href="#二，安装cocoapods-packager插件" class="headerlink" title="二，安装cocoapods-packager插件"></a>二，安装cocoapods-packager插件</h3><ul>
-<li><p>执行命令</p>
-<pre><code>sudo gem install cocoapods-packager
-</code></pre></li>
-</ul>
-<h3 id="三，配置podspec文件"><a href="#三，配置podspec文件" class="headerlink" title="三，配置podspec文件"></a>三，配置podspec文件</h3><ul>
-<li><a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">官方podspec文件语法详细说明</a></li>
-<li><p>下面是我项目中的podspec文件，请参考配置</p>
-<pre><code>Pod::Spec.new do |s|
-s.name             = &quot;XXXLIB&quot;
-s.version          = &quot;0.4.0.8&quot;
-s.summary          = &quot;生成静态库的XXXLIB.&quot;
-
-s.description      = &lt;&lt;-DESC
-成静态库的XXXLIB
-DESC
-
-s.homepage         = &quot;https://github.com/username/XXXLIB&quot;
-
-s.license          = &apos;MIT&apos;
-s.author           = { &quot;username&quot; =&gt; &quot;XXX@gmail.com&quot; }
-# s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; &apos;0.4.0.8&apos;}
-s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; s.version.to_s}
-
-s.platform         = :ios, &apos;7.0&apos;
-s.requires_arc     = true
-
-s.source_files     = [&apos;Pod/Classes/**/*.{h,m,plist,c}&apos;]
-
-s.resource_bundles = {
-&apos;XXXRES&apos; =&gt; [&apos;Pod/Assets/*.{png,jpg}&apos;]
-}
-
-s.public_header_files = [&apos;Pod/Classes/XXX/*.h&apos;]
-
-s.frameworks = [&apos;UIKit&apos;, &apos;MapKit&apos;,&apos;MobileCoreServices&apos;,&apos;MobileCoreServices&apos;,&apos;SystemConfiguration&apos;,&apos;CFNetwork&apos;,&apos;AVFoundation&apos;,&apos;CoreData&apos;,&apos;ImageIO&apos;,&apos;Twitter&apos;]
-s.libraries  = &apos;z.1&apos;
-s.dependency &apos;AFNetworking&apos;, &apos;~&gt; 2.3&apos;
-s.dependency &apos;FMDB&apos;,&apos;~&gt; 2.2&apos;
-s.dependency &apos;MJExtension&apos;
-s.dependency &apos;SDWebImage&apos;
-s.dependency &apos;CocoaAsyncSocket&apos;
-s.dependency &apos;JSONModel&apos;
-
-end
-</code></pre></li>
-</ul>
-<h3 id="四，基于pod自动创建静态类库以及打包的过程"><a href="#四，基于pod自动创建静态类库以及打包的过程" class="headerlink" title="四，基于pod自动创建静态类库以及打包的过程"></a>四，基于pod自动创建静态类库以及打包的过程</h3><ol>
-<li><p>验证</p>
-<p> 开发完成静态类库之后，需要运行pod lib lint验证一下类库是否符合pod的要求（cd到podspec文件所在目录下）</p>
-<pre><code>pod lib lint XXXLIB.podspec -only-errors –verbose –allow-warnings
-</code></pre></li>
-<li><p>更新pod（cd到Podfile文件所在目录下）</p>
-<pre><code>pod update –verbose –no-repo-update 或者pod setup
-</code></pre></li>
-<li><p>提交,更新版本号（cd到podspec文件所在目录下）</p>
-<pre><code>git add .
-
-git commit -a -m’v请换成版本号’
-
-git tag -a 版本号 -m’v版本号’
-</code></pre></li>
-<li><p>将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</p>
-<pre><code>s.version = “修改为自己需要的版本号”
-</code></pre></li>
-<li><p>打包（cd到podspec所在文件目录下）</p>
-<pre><code>pod package XXXLIB.podspec –library –force 打包成.a文件。–force是指强制覆盖
-
-pod package XXXLIB.podspec –force 打包成.framework文件
-</code></pre></li>
-</ol>
-<h3 id="五，相关的参考阅读"><a href="#五，相关的参考阅读" class="headerlink" title="五，相关的参考阅读"></a>五，相关的参考阅读</h3><ul>
-<li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">关于分类category打包的错误处理
-</a></li>
-<li><a href="http://www.cnblogs.com/brycezhang/p/4117180.html" target="_blank" rel="external">使用CocoaPods开发并打包静态库</a></li>
-</ul>
-<p><br><br><br></p>
-
-          
-        
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <div>
-      
-    </div>
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </article>
-
-
-    
-      
-
-  
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
-
-    
-      <header class="post-header">
-
-        
-        
-          <h1 class="post-title" itemprop="name headline">
-            
-            
-              
-                
-                <a class="post-title-link" href="/2015/07/20/揭开block的面纱-读书笔记/" itemprop="url">
-                  揭开block的面纱-读书笔记
-                </a>
+                揭开block的面纱-读书笔记
               
             
           </h1>
@@ -519,9 +320,7 @@ pod package XXXLIB.podspec –force 打包成.framework文件
       
 
       
-        
-          
-            <h1 id="揭开block的面纱-读书笔记"><a href="#揭开block的面纱-读书笔记" class="headerlink" title="揭开block的面纱-读书笔记"></a>揭开block的面纱-读书笔记</h1><p>Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。</p>
+        <h1 id="揭开block的面纱-读书笔记"><a href="#揭开block的面纱-读书笔记" class="headerlink" title="揭开block的面纱-读书笔记"></a>揭开block的面纱-读书笔记</h1><p>Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。</p>
 <h3 id="编译举例"><a href="#编译举例" class="headerlink" title="编译举例"></a>编译举例</h3><p>比如如下代码：</p>
 <pre><code>int main()
 {
@@ -786,36 +585,59 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
 </li>
 </ol>
 
-          
+      
+    </div>
+
+    <div>
+      
         
+
       
     </div>
 
     <div>
       
-    </div>
+        
 
-    <div>
       
     </div>
 
     <footer class="post-footer">
       
-
+        <div class="post-tags">
+          
+            <a href="/tags/iOS/" rel="tag">#iOS</a>
+          
+        </div>
       
 
       
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/23/使用CocoaPods开发并打包静态库/" rel="prev" title="使用CocoaPods开发并打包静态库">
+                使用CocoaPods开发并打包静态库 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
       
-        <div class="post-eof"></div>
+
+      
       
     </footer>
   </article>
 
 
-    
-  </section>
 
-  
+    <div class="post-spread">
+      
+    </div>
+  </div>
 
 
           </div>
@@ -823,6 +645,25 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
 
 
           
+  <div class="duoshuo" id="comments">
+    <!-- 多说评论框 start -->
+    <div class="ds-thread" data-thread-key="<%= key%>" data-title="<%= title%>" data-url="<%= url%>"></div>
+    <!-- 多说评论框 end -->
+    <!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:"<%= theme.duoshuo.domain%>"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+    </script>
+    <!-- 多说公共JS代码 end -->
+</div>
+
 
         </div>
         
@@ -842,8 +683,17 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview sidebar-panel  sidebar-panel-active ">
+      <section class="site-overview sidebar-panel ">
         <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
           <img class="site-author-image" itemprop="image"
                src="/images/avatar.jpg"
@@ -893,6 +743,17 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
 
       </section>
 
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#揭开block的面纱-读书笔记"><span class="nav-number">1.</span> <span class="nav-text">揭开block的面纱-读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译举例"><span class="nav-number">1.0.1.</span> <span class="nav-text">编译举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#截获自动变量值，及改写被截获自动变量值的方法"><span class="nav-number">1.0.2.</span> <span class="nav-text">截获自动变量值，及改写被截获自动变量值的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候栈上的Block会复制到堆"><span class="nav-number">1.0.3.</span> <span class="nav-text">什么时候栈上的Block会复制到堆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block变量存储域"><span class="nav-number">1.0.4.</span> <span class="nav-text">__block变量存储域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Block循环引用"><span class="nav-number">1.0.5.</span> <span class="nav-text">Block循环引用</span></a></li></ol></li></ol></li></ol></div>
+            
+          </div>
+        </section>
       
 
     </div>
@@ -989,6 +850,10 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
   
 
   
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.1"></script>
+
+
 
   
 

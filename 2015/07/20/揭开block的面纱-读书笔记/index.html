@@ -84,34 +84,34 @@
 
 
 
-<meta name="description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+<meta name="description" content="Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
 编译举例比如如下代码：
 int main()
 {
     static int static_val = 3;
 
-    in">
+    int (^blk)() = ^{">
 <meta property="og:type" content="article">
 <meta property="og:title" content="揭开block的面纱-读书笔记">
 <meta property="og:url" content="http://yoursite.com/2015/07/20/揭开block的面纱-读书笔记/index.html">
 <meta property="og:site_name" content="seeforward">
-<meta property="og:description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+<meta property="og:description" content="Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
 编译举例比如如下代码：
 int main()
 {
     static int static_val = 3;
 
-    in">
-<meta property="og:updated_time" content="2016-07-18T13:04:14.000Z">
+    int (^blk)() = ^{">
+<meta property="og:updated_time" content="2016-07-19T02:39:31.000Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="揭开block的面纱-读书笔记">
-<meta name="twitter:description" content="揭开block的面纱-读书笔记Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
+<meta name="twitter:description" content="Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。
 编译举例比如如下代码：
 int main()
 {
     static int static_val = 3;
 
-    in">
+    int (^blk)() = ^{">
 
 
 
@@ -320,7 +320,7 @@ int main()
       
 
       
-        <h1 id="揭开block的面纱-读书笔记"><a href="#揭开block的面纱-读书笔记" class="headerlink" title="揭开block的面纱-读书笔记"></a>揭开block的面纱-读书笔记</h1><p>Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。</p>
+        <p>Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。</p>
 <h3 id="编译举例"><a href="#编译举例" class="headerlink" title="编译举例"></a>编译举例</h3><p>比如如下代码：</p>
 <pre><code>int main()
 {
@@ -385,125 +385,115 @@ int main()
 <li>静态变量</li>
 <li>静态全局变量</li>
 <li><p>全局变量</p>
-<p>例子：</p>
-</li>
-</ul>
-</li>
-</ol>
-<pre><code>    int global_val = 1;
-    static int static_global_val = 2;
+<pre><code>例子：
 
-    int main()
-    {
-        static int static_val =  3;
+int global_val = 1;
+static int static_global_val = 2;
 
-        void (^blk)(void) = ^{
-            global_val *= 1;
-            static_global_val *= 2;
-            static_val *= 3;
-        }
-        return 0;
+int main()
+{
+    static int static_val =  3;
+
+    void (^blk)(void) = ^{
+        global_val *= 1;
+        static_global_val *= 2;
+        static_val *= 3;
     }
-
+    return 0;
+}
 
 转换C语言后：
 
+struct __main_block_impl_0{
+    struct __block_impl  impl;
+    struct __main_block_desc_0* Desc;
+    int *static_val;
 
-    struct __main_block_impl_0{
-        struct __block_impl  impl;
-        struct __main_block_desc_0* Desc;
-        int *static_val;
+    // 构造函数
+    __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int *_static_val, int flags=0) : static_val(_static_val) {
 
-        // 构造函数
-        __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int *_static_val, int flags=0) : static_val(_static_val) {
+        impl.isa = &amp;_NSConcreteStackBlock;
+        impl.Flags = flags;
+        impl.FuncPtr = fp;
+        Desc = desc;
 
-            impl.isa = &amp;_NSConcreteStackBlock;
-            impl.Flags = flags;
-            impl.FuncPtr = fp;
-            Desc = desc;
-
-        }
     }
-    // 方法的实现
-    static int __main_block_func_0(struct __main_block_impl_0 *__cself) {
-      int *static_val = __cself-&gt;static_val; // bound by copy
+}
+// 方法的实现
+static int __main_block_func_0(struct __main_block_impl_0 *__cself) {
+  int *static_val = __cself-&gt;static_val; // bound by copy
 
-        global_val = 10;
-        static_global_val = 20;
-        (*static_val) = 30;
+    global_val = 10;
+    static_global_val = 20;
+    (*static_val) = 30;
 
-        return 0;
-    }
-
-总结，**静态全局变量** 和**全局变量**，是直接拿过来用，**静态变量**是在block结构体中拿到其地址（指针）来改变其值。
-</code></pre><ol>
+    return 0;
+}
+</code></pre><p>总结，<strong>静态全局变量</strong> 和<strong>全局变量</strong>，是直接拿过来用，<strong>静态变量</strong>是在block结构体中拿到其地址（指针）来改变其值。</p>
+</li>
+</ul>
+</li>
 <li><p>第二种方法是使用<strong>block说明符，更准确的表述方式为“</strong>block存储域类说明符”，<br>C语言有以下存储域说明符</p>
 <ol>
 <li>typedef</li>
 <li>extern</li>
 <li>static 存到数据区中</li>
 <li>auto  存到栈</li>
-<li><p>register</p>
-<p>如下源代码</p>
-</li>
+<li>register</li>
 </ol>
 </li>
 </ol>
-<pre><code>    int main()
-    {
-       typedef void (^blk_t)();
+<h3 id="blcok变量编译"><a href="#blcok变量编译" class="headerlink" title="__blcok变量编译"></a>__blcok变量编译</h3><p>使用__block的代码如下：</p>
+<pre><code>int main()
+{
+   typedef void (^blk_t)();
 
-       int __block var = 1;
-       blk_t blk = ^{
-           var = 2;
-       };
+   int __block var = 1;
+   blk_t blk = ^{
+       var = 2;
+   };
 
-       return 0;
-    }
+   return 0;
+}
+</code></pre><p>经过编译后：</p>
+<pre><code>int main()
+{
 
-经过编译后：
+    typedef void (*blk_t)();
 
+    blk_t blk;
+    __Block_byref_var_0 var = {(void*)0,(__Block_byref_var_0 *)&amp;var, 0, sizeof(__Block_byref_var_0), 1};
+    blk = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, (__Block_byref_var_0 *)&amp;var, 570425344));
 
-    int main()
-    {
-
-        typedef void (*blk_t)();
-
-        blk_t blk;
-        __Block_byref_var_0 var = {(void*)0,(__Block_byref_var_0 *)&amp;var, 0, sizeof(__Block_byref_var_0), 1};
-        blk = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, (__Block_byref_var_0 *)&amp;var, 570425344));
-
-        return 0;
-    }
-
-可以看出__block变量其实被转换为__Block_byref_var_0结构体：
-
-    struct __Block_byref_var_0 {
-      void *__isa;
-    __Block_byref_var_0 *__forwarding;
-     int __flags;
-     int __size;
-     int var;
-    };
-
-方法的实现为
-
-    static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
+    return 0;
+}
+</code></pre><p>可以看出<strong>block变量其实被转换为</strong>Block_byref_var_0结构体：</p>
+<p>其中<strong>forwarding的作用：</strong>block变量用结构体成员变量__forwarding可以实现<strong>block变量配置在栈上还是堆上时都能够正确访问</strong>block变量。</p>
+<pre><code>struct __Block_byref_var_0 {
+  void *__isa;
+__Block_byref_var_0 *__forwarding;
+ int __flags;
+ int __size;
+ int var;
+};
+</code></pre><p>方法的实现为：</p>
+<pre><code>static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
   __Block_byref_var_0 *var = __cself-&gt;var; // bound by ref
 
-        (var-&gt;__forwarding-&gt;var) = 2;
-    }
+    (var-&gt;__forwarding-&gt;var) = 2;
+}
+</code></pre><p>另外__block变量需要控制生命周期，又出现了下面两个由栈copy到堆的copy方法，和销毁的dispose方法</p>
+<pre><code>static void __main_block_copy_0(
+struct __main_block_impl_0*dst, 
+struct __main_block_impl_0*src) {
+_Block_object_assign((void*)&amp;dst-&gt;var, (void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);
+}
 
-另外__block变量需要控制生命周期，又出现了下面两个由栈copy到堆的copy方法，和销毁的dispose方法
-
-    static void __main_block_copy_0(struct __main_block_impl_0*dst, struct __main_block_impl_0*src) {_Block_object_assign((void*)&amp;dst-&gt;var, (void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-    static void __main_block_dispose_0(struct __main_block_impl_0*src) {_Block_object_dispose((void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);}
-
-
-其中__forwarding的作用：
-
-__block变量用结构体成员变量\__forwarding可以实现__block变量配置在栈上还是堆上时都能够正确访问__block变量。
+static void __main_block_dispose_0(
+struct __main_block_impl_0*src
+) {
+_Block_object_dispose((void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);
+}
 </code></pre><h3 id="什么时候栈上的Block会复制到堆"><a href="#什么时候栈上的Block会复制到堆" class="headerlink" title="什么时候栈上的Block会复制到堆"></a>什么时候栈上的Block会复制到堆</h3><p>（将block从栈上复制到堆上相当消耗CPU）</p>
 <ol>
 <li>调用Block的copy实例方法</li>
@@ -750,7 +740,7 @@ __block变量用结构体成员变量\__forwarding可以实现__block变量配�
               
             
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#揭开block的面纱-读书笔记"><span class="nav-number">1.</span> <span class="nav-text">揭开block的面纱-读书笔记</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译举例"><span class="nav-number">1.0.1.</span> <span class="nav-text">编译举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#截获自动变量值，及改写被截获自动变量值的方法"><span class="nav-number">1.0.2.</span> <span class="nav-text">截获自动变量值，及改写被截获自动变量值的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候栈上的Block会复制到堆"><span class="nav-number">1.0.3.</span> <span class="nav-text">什么时候栈上的Block会复制到堆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block变量存储域"><span class="nav-number">1.0.4.</span> <span class="nav-text">__block变量存储域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Block循环引用"><span class="nav-number">1.0.5.</span> <span class="nav-text">Block循环引用</span></a></li></ol></li></ol></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#编译举例"><span class="nav-number">1.</span> <span class="nav-text">编译举例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#截获自动变量值，及改写被截获自动变量值的方法"><span class="nav-number">2.</span> <span class="nav-text">截获自动变量值，及改写被截获自动变量值的方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#blcok变量编译"><span class="nav-number">3.</span> <span class="nav-text">__blcok变量编译</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么时候栈上的Block会复制到堆"><span class="nav-number">4.</span> <span class="nav-text">什么时候栈上的Block会复制到堆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block变量存储域"><span class="nav-number">5.</span> <span class="nav-text">__block变量存储域</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Block循环引用"><span class="nav-number">6.</span> <span class="nav-text">Block循环引用</span></a></li></ol></div>
             
           </div>
         </section>

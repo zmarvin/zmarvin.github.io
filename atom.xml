@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>梦想的路上停不下脚步</title>
+  <subtitle>seeforward</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="http://yoursite.com/"/>
+  <updated>2017-01-29T11:27:41.000Z</updated>
+  <id>http://yoursite.com/</id>
+  
+  <author>
+    <name>zmarvin</name>
+    <email>seeforward@zmarvin.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>揭开block的面纱-读书笔记</title>
+    <link href="http://yoursite.com/2016/05/20/%E6%8F%AD%E5%BC%80block%E7%9A%84%E9%9D%A2%E7%BA%B1-%E8%AF%BB%E4%B9%A6%E7%AC%94%E8%AE%B0/"/>
+    <id>http://yoursite.com/2016/05/20/揭开block的面纱-读书笔记/</id>
+    <published>2016-05-19T16:00:00.000Z</published>
+    <updated>2017-01-29T11:27:41.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>[TOC]</p>
+<h3 id="一，概述"><a href="#一，概述" class="headerlink" title="一，概述"></a>一，概述</h3><p>Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语言源代码来处理的。通过clang -rewrite-objc 资源文件 命令，得到 资源文件.cpp文件，分析可以知道block内部的实现原理。</p>
+<h3 id="二，编译举例"><a href="#二，编译举例" class="headerlink" title="二，编译举例"></a>二，编译举例</h3><p>比如如下代码：</p>
+<pre><code>int main()
+{
+    static int static_val = 3;
+
+    int (^blk)() = ^{
+        (*static_val) = 30;
+        return 0;
+    }
+
+    int j = blk();
+}
+</code></pre><p>经过编译转换后为：</p>
+<pre><code>int main()
+{
+
+    static int static_val = 3;
+
+    int (*blk)() = ((int (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, &amp;static_val));
+
+    int j = ((int (*)(__block_impl *))((__block_impl *)blk)-&gt;FuncPtr)((__block_impl *)blk);
+
+    return 0;
+}
+</code></pre><p>从中我们可以看出，block 就是一个结构体__main_block_impl_0，这个结构体中包含了一个isa指针，方法的地址等，如下：</p>
+<pre><code>struct __main_block_impl_0 {
+  struct __block_impl impl;
+  struct __main_block_desc_0* Desc;
+  int *static_val;
+  __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int *_static_val, int flags=0) : static_val(_static_val) {
+    impl.isa = &amp;_NSConcreteStackBlock;
+    impl.Flags = flags;
+    impl.FuncPtr = fp;
+    Desc = desc;
+  }
+};
+</code></pre><p>其中__block_impl为：</p>
+<pre><code>struct __block_impl {
+      void *isa;
+      int Flags;
+      int Reserved;
+      void *FuncPtr;
+};
+</code></pre><p>方法实现__main_block_func_0为：</p>
+<pre><code>static int __main_block_func_0(struct __main_block_impl_0 *__cself) {
+    int *static_val = __cself-&gt;static_val; // bound by copy
+
+      global_val = 10;
+      static_global_val = 20;
+      (*static_val) = 30;
+
+      return 0;
+}
+</code></pre><p>以及__main_block_desc_0：</p>
+<pre><code>static struct __main_block_desc_0 {
+  size_t reserved;
+  size_t Block_size;
+} __main_block_desc_0_DATA = { 0, sizeof(struct __main_block_impl_0)};
+</code></pre><h3 id="三，截获自动变量值，及改写被截获自动变量值的方法"><a href="#三，截获自动变量值，及改写被截获自动变量值的方法" class="headerlink" title="三，截获自动变量值，及改写被截获自动变量值的方法"></a>三，截获自动变量值，及改写被截获自动变量值的方法</h3><ol>
+<li><p>第一种，C语言中有一种变量，允许Block改写值</p>
+<ul>
+<li>静态变量</li>
+<li>静态全局变量</li>
+<li><p>全局变量</p>
+<pre><code>例子：
+
+int global_val = 1;
+static int static_global_val = 2;
+
+int main()
+{
+    static int static_val =  3;
+
+    void (^blk)(void) = ^{
+        global_val *= 1;
+        static_global_val *= 2;
+        static_val *= 3;
+    }
+    return 0;
+}
+
+转换C语言后：
+
+struct __main_block_impl_0{
+    struct __block_impl  impl;
+    struct __main_block_desc_0* Desc;
+    int *static_val;
+
+    // 构造函数
+    __main_block_impl_0(void *fp, struct __main_block_desc_0 *desc, int *_static_val, int flags=0) : static_val(_static_val) {
+
+        impl.isa = &amp;_NSConcreteStackBlock;
+        impl.Flags = flags;
+        impl.FuncPtr = fp;
+        Desc = desc;
+
+    }
+}
+// 方法的实现
+static int __main_block_func_0(struct __main_block_impl_0 *__cself) {
+  int *static_val = __cself-&gt;static_val; // bound by copy
+
+    global_val = 10;
+    static_global_val = 20;
+    (*static_val) = 30;
+
+    return 0;
+}
+</code></pre><p>总结，<strong>静态全局变量</strong> 和<strong>全局变量</strong>，是直接拿过来用，<strong>静态变量</strong>是在block结构体中拿到其地址（指针）来改变其值。</p>
+</li>
+</ul>
+</li>
+<li><p>第二种方法是使用__block说明符，更准确的表述方式为“__block存储域类说明符”，<br>C语言有以下存储域说明符</p>
+<ol>
+<li>typedef</li>
+<li>extern</li>
+<li>static 存到数据区中</li>
+<li>auto  存到栈</li>
+<li>register</li>
+</ol>
+</li>
+</ol>
+<h3 id="四，-blcok变量编译"><a href="#四，-blcok变量编译" class="headerlink" title="四，__blcok变量编译"></a>四，__blcok变量编译</h3><p>使用__block的代码如下：</p>
+<pre><code>int main()
+{
+   typedef void (^blk_t)();
+
+   int __block var = 1;
+   blk_t blk = ^{
+       var = 2;
+   };
+
+   return 0;
+}
+</code></pre><p>经过编译后：</p>
+<pre><code>int main()
+{
+
+    typedef void (*blk_t)();
+
+    blk_t blk;
+    __Block_byref_var_0 var = {(void*)0,(__Block_byref_var_0 *)&amp;var, 0, sizeof(__Block_byref_var_0), 1};
+    blk = ((void (*)())&amp;__main_block_impl_0((void *)__main_block_func_0, &amp;__main_block_desc_0_DATA, (__Block_byref_var_0 *)&amp;var, 570425344));
+
+    return 0;
+}
+</code></pre><p>可以看出__block变量其实被转换为__Block_byref_var_0结构体：</p>
+<p>其中__forwarding的作用：__block变量用结构体成员变量__forwarding可以实现__block变量配置在栈上还是堆上时都能够正确访问__block变量。</p>
+<pre><code>struct __Block_byref_var_0 {
+  void *__isa;
+__Block_byref_var_0 *__forwarding;
+ int __flags;
+ int __size;
+ int var;
+};
+</code></pre><p>方法的实现为：</p>
+<pre><code>static void __main_block_func_0(struct __main_block_impl_0 *__cself) {
+  __Block_byref_var_0 *var = __cself-&gt;var; // bound by ref
+
+    (var-&gt;__forwarding-&gt;var) = 2;
+}
+</code></pre><p>另外__block变量需要控制生命周期，又出现了下面两个由栈copy到堆的copy方法，和销毁的dispose方法</p>
+<pre><code>static void __main_block_copy_0(
+struct __main_block_impl_0*dst, 
+struct __main_block_impl_0*src) {
+_Block_object_assign((void*)&amp;dst-&gt;var, (void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);
+}
+
+static void __main_block_dispose_0(
+struct __main_block_impl_0*src
+) {
+_Block_object_dispose((void*)src-&gt;var, 8/*BLOCK_FIELD_IS_BYREF*/);
+}
+</code></pre><h3 id="五，什么时候栈上的Block会复制到堆"><a href="#五，什么时候栈上的Block会复制到堆" class="headerlink" title="五，什么时候栈上的Block会复制到堆"></a>五，什么时候栈上的Block会复制到堆</h3><p>（将block从栈上复制到堆上相当消耗CPU）</p>
+<ol>
+<li>调用Block的copy实例方法</li>
+<li>Block作为函数返回值返回时</li>
+<li>将Blcok赋值给附有__strong修饰符id类型的类或者Block类型成员变量时</li>
+<li>在方法名中含有usingBlock的Cocoa框架方法或Grand Central Dispatch的API中传递Block时</li>
+</ol>
+<h3 id="六，-block变量存储域"><a href="#六，-block变量存储域" class="headerlink" title="六，__block变量存储域"></a>六，__block变量存储域</h3><p>使用__block变量的Block从栈复制到堆上时，__block变量也会受到影响。</p>
+<p>总结如下：</p>
+<ol>
+<li>__block变量的存储域 在栈时，从栈复制到堆并被Blcok持有。</li>
+<li>__block变量的存储域 在堆时，被Blcok持有。</li>
+<li>当多个Block中使用__block变量时，当任何一个Block从栈复制到堆时，__block变量也会一并从栈复制到堆并被该Block所持有。当剩下的Block从栈复制到堆时，被复制的Block持有__block变量，并增加__block变量的引用计数。</li>
+</ol>
+<p>__block修饰符可以和__strong，__weak，__unsafe_unretained修饰符共用，但是和__autoreleasing修饰符共用会产生编译错误。</p>
+<h3 id="七，Block循环引用"><a href="#七，Block循环引用" class="headerlink" title="七，Block循环引用"></a>七，Block循环引用</h3><ol>
+<li><p>引发循环引用的例子：</p>
+<ul>
+<li>object对象的强引用MyBlock类型成员blk_。在init方法中有MyBlock类型的myblock，使用附有__strong修饰符的id类型变量self，并且myblock赋值给object的成员变量blk_，此时myblock（或者blk_）由栈复制到堆，并持有所使用的self。self持有myblock，myblock持有self，发生了循环引用。</li>
+<li><p>如下代码中block内没有使用self也同样截获了self，引起了循环引用。</p>
+<pre><code>typedef void (^blk_t)();
+@interface MyObject : NSObjec{
+    blk_t blk_
+    id obj_
+}
+@end
+@implementation MyObject
+
+-(id)init{
+    self = [super init];
+    blk_ = ^{
+        NSLog(@“obj_ = %@”,obj_); // 其中obj_相当于self-&gt;obj_，也会截获sel
+    }
+    return self;
+}
+
+@end
+</code></pre></li>
+</ul>
+</li>
+<li><p>怎样避免循环引用</p>
+<ol>
+<li>使用__weak或__unsafe_unretain修饰符</li>
+<li><p>使用__block修饰符，例：</p>
+<pre><code>- (id)init
+{
+    self = [super init];
+
+    __block id temp = self;
+
+    blk_ = ^{
+        temp = nil;
+    }
+
+}
+
+- (void)execBlock
+{
+    blk_();
+}
+</code></pre><p>如果不调用execBlock实例方法，便会导致循环引用。</p>
+</li>
+</ol>
+</li>
+<li><p>使用__block变量和__weak及__unsafe_unretained修饰符避免循环引用的方法比较</p>
+<ul>
+<li><p>使用__block变量优点如下：</p>
+<ol>
+<li>通过__block变量可控制对象的持有期间</li>
+<li>在不能使用__weak修饰符的环境中不使用__unsafe_unretained修饰符即可（不必担心悬垂指针）<br> 使用Block时可动态地决定是否将nil或其他对象赋值在__block变量中</li>
+</ol>
+</li>
+<li><p>使用__block变量的缺点如下：</p>
+<ol>
+<li>为避免循环引用必须执行Block.</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;[TOC]&lt;/p&gt;
+&lt;h3 id=&quot;一，概述&quot;&gt;&lt;a href=&quot;#一，概述&quot; class=&quot;headerlink&quot; title=&quot;一，概述&quot;&gt;&lt;/a&gt;一，概述&lt;/h3&gt;&lt;p&gt;Block是“带有自动变量值得匿名函数”，Block看上去好像很特别，但它实际上是作为极普通的C语
+    
+    </summary>
+    
+      <category term="blog" scheme="http://yoursite.com/categories/blog/"/>
+    
+    
+      <category term="iOS" scheme="http://yoursite.com/tags/iOS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>使用CocoaPods开发并打包静态库</title>
+    <link href="http://yoursite.com/2016/04/23/%E4%BD%BF%E7%94%A8CocoaPods%E5%BC%80%E5%8F%91%E5%B9%B6%E6%89%93%E5%8C%85%E9%9D%99%E6%80%81%E5%BA%93/"/>
+    <id>http://yoursite.com/2016/04/23/使用CocoaPods开发并打包静态库/</id>
+    <published>2016-04-22T16:00:00.000Z</published>
+    <updated>2016-07-18T12:53:49.000Z</updated>
+    
+    <content type="html"><![CDATA[<p>不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一个，静态库中包含一个，两个可以同时存在。在开始之前，需要安装通过pod lib命令完成初始项目的搭建，和安装cocoapods-packager插件。</p>
+<p>注：根据上下文将代码中XXX修改为自己相应的内容</p>
+<h3 id="一，通过pod-lib命令完成初始项目的搭建"><a href="#一，通过pod-lib命令完成初始项目的搭建" class="headerlink" title="一，通过pod lib命令完成初始项目的搭建"></a>一，通过pod lib命令完成初始项目的搭建</h3><ul>
+<li><p>执行命令</p>
+<pre><code>pod lib create XXXLib
+</code></pre></li>
+<li><p>在此期间需要确认下面4个问题：</p>
+<pre><code>Would you like to provide a demo application with your library? [ Yes / No ]
+yes
+Which testing frameworks will you use? [ Specta / Kiwi / None ]
+Kiwi
+Would you like to do view based testing? [ Yes / No ]
+No
+What is your class prefix?
+XXX
+</code></pre></li>
+</ul>
+<h3 id="二，安装cocoapods-packager插件"><a href="#二，安装cocoapods-packager插件" class="headerlink" title="二，安装cocoapods-packager插件"></a>二，安装cocoapods-packager插件</h3><ul>
+<li><p>执行命令</p>
+<pre><code>sudo gem install cocoapods-packager
+</code></pre></li>
+</ul>
+<h3 id="三，配置podspec文件"><a href="#三，配置podspec文件" class="headerlink" title="三，配置podspec文件"></a>三，配置podspec文件</h3><ul>
+<li><a href="http://guides.cocoapods.org/syntax/podspec.html#specification" target="_blank" rel="external">官方podspec文件语法详细说明</a></li>
+<li><p>下面是我项目中的podspec文件，请参考配置</p>
+<pre><code>Pod::Spec.new do |s|
+s.name             = &quot;XXXLIB&quot;
+s.version          = &quot;0.4.0.8&quot;
+s.summary          = &quot;生成静态库的XXXLIB.&quot;
+
+s.description      = &lt;&lt;-DESC
+成静态库的XXXLIB
+DESC
+
+s.homepage         = &quot;https://github.com/username/XXXLIB&quot;
+
+s.license          = &apos;MIT&apos;
+s.author           = { &quot;username&quot; =&gt; &quot;XXX@gmail.com&quot; }
+# s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; &apos;0.4.0.8&apos;}
+s.source           = { :git =&gt; &quot;/Users/XXX用户名/Desktop/XXXLIB&quot;, :tag =&gt; s.version.to_s}
+
+s.platform         = :ios, &apos;7.0&apos;
+s.requires_arc     = true
+
+s.source_files     = [&apos;Pod/Classes/**/*.{h,m,plist,c}&apos;]
+
+s.resource_bundles = {
+&apos;XXXRES&apos; =&gt; [&apos;Pod/Assets/*.{png,jpg}&apos;]
+}
+
+s.public_header_files = [&apos;Pod/Classes/XXX/*.h&apos;]
+
+s.frameworks = [&apos;UIKit&apos;, &apos;MapKit&apos;,&apos;MobileCoreServices&apos;,&apos;MobileCoreServices&apos;,&apos;SystemConfiguration&apos;,&apos;CFNetwork&apos;,&apos;AVFoundation&apos;,&apos;CoreData&apos;,&apos;ImageIO&apos;,&apos;Twitter&apos;]
+s.libraries  = &apos;z.1&apos;
+s.dependency &apos;AFNetworking&apos;, &apos;~&gt; 2.3&apos;
+s.dependency &apos;FMDB&apos;,&apos;~&gt; 2.2&apos;
+s.dependency &apos;MJExtension&apos;
+s.dependency &apos;SDWebImage&apos;
+s.dependency &apos;CocoaAsyncSocket&apos;
+s.dependency &apos;JSONModel&apos;
+
+end
+</code></pre></li>
+</ul>
+<h3 id="四，基于pod自动创建静态类库以及打包的过程"><a href="#四，基于pod自动创建静态类库以及打包的过程" class="headerlink" title="四，基于pod自动创建静态类库以及打包的过程"></a>四，基于pod自动创建静态类库以及打包的过程</h3><ol>
+<li><p>验证</p>
+<p> 开发完成静态类库之后，需要运行pod lib lint验证一下类库是否符合pod的要求（cd到podspec文件所在目录下）</p>
+<pre><code>pod lib lint XXXLIB.podspec -only-errors –verbose –allow-warnings
+</code></pre></li>
+<li><p>更新pod（cd到Podfile文件所在目录下）</p>
+<pre><code>pod update –verbose –no-repo-update 或者pod setup
+</code></pre></li>
+<li><p>提交,更新版本号（cd到podspec文件所在目录下）</p>
+<pre><code>git add .
+
+git commit -a -m’v请换成版本号’
+
+git tag -a 版本号 -m’v版本号’
+</code></pre></li>
+<li><p>将podspec文件中s.version的版本号替换为所需要的版本号（第三步git tag的版本）</p>
+<pre><code>s.version = “修改为自己需要的版本号”
+</code></pre></li>
+<li><p>打包（cd到podspec所在文件目录下）</p>
+<pre><code>pod package XXXLIB.podspec –library –force 打包成.a文件。–force是指强制覆盖
+
+pod package XXXLIB.podspec –force 打包成.framework文件
+</code></pre></li>
+</ol>
+<h3 id="五，相关的参考阅读"><a href="#五，相关的参考阅读" class="headerlink" title="五，相关的参考阅读"></a>五，相关的参考阅读</h3><ul>
+<li><a href="http://www.dreamingwish.com/frontui/article/default/the-create-the-static-the-library-containing-the-category.html" target="_blank" rel="external">关于分类category打包的错误处理
+</a></li>
+<li><a href="http://www.cnblogs.com/brycezhang/p/4117180.html" target="_blank" rel="external">使用CocoaPods开发并打包静态库</a></li>
+</ul>
+<p><br><br><br></p>
+]]></content>
+    
+    <summary type="html">
+    
+      &lt;p&gt;不知大家有没有遇到这种情况，当给一个项目中导入一个静态库的时候，会遇到静态库重复第三方库的错误，这时cocopods的这项技术就派上用场了。该技术通过对引用的三方库进行重命名很好的解决了类库命名冲突的问题，比如项目中可以包含两个AFNetworking框架，项目中本身包含一
+    
+    </summary>
+    
+      <category term="blog" scheme="http://yoursite.com/categories/blog/"/>
+    
+    
+      <category term="iOS" scheme="http://yoursite.com/tags/iOS/"/>
+    
+  </entry>
+  
+</feed>
